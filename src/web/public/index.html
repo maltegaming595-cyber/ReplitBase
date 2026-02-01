@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zosfas Web</title>
+  <style>
+    :root { --bg:#0b0f14; --card:#101826; --muted:#9fb0c6; --text:#e7eef8; --border:#1d2a3d; --accent:#4cc2ff; --danger:#ff5c7a; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--text); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 80px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .logo { width:34px; height:34px; border-radius: 10px; background: linear-gradient(135deg, #4cc2ff, #7c5cff); }
+    .title { font-weight:800; letter-spacing:.2px; }
+    .muted { color: var(--muted); }
+    .row { display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; }
+    @media (max-width: 860px){ .row { grid-template-columns: 1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .btn { background: #1a2a42; color: var(--text); border:1px solid var(--border); padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600; }
+    .btn:hover{ border-color:#2a3e5c; }
+    .btn.primary{ background: linear-gradient(135deg, #4cc2ff, #7c5cff); border:none; }
+    .btn.danger{ background: #2a1120; border-color: #49223a; color:#ffd1dc; }
+    input { width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--border); background:#0c1320; color:var(--text); outline:none; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:#0c1320; }
+    .badge.premium{ border-color:#2c6d8c; }
+    .badge.free{ border-color:#3b3b3b; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 520px){ .grid2 { grid-template-columns: 1fr; } }
+    .hr { height:1px; background: var(--border); margin: 14px 0; }
+    .small { font-size: 12px; }
+    table { width:100%; border-collapse: collapse; }
+    td, th { border-bottom: 1px solid var(--border); padding: 10px 6px; text-align:left; font-size: 13px; }
+    th { color: var(--muted); font-weight: 700; }
+    .tabs { display:flex; gap:8px; }
+    .tab { padding:8px 10px; border-radius: 999px; border: 1px solid var(--border); cursor:pointer; user-select:none; }
+    .tab.active { border-color: #2a6b8f; background:#0c1726; }
+    .hidden { display:none; }
+    a { color: var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    pre { white-space: pre-wrap; word-break: break-word; background:#0c1320; border:1px solid var(--border); padding:12px; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div class="title">Zosfas Web</div>
+          <div class="muted small">Website + bot share the same Premium + limits.</div>
+        </div>
+      </div>
+      <div id="authArea"></div>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" data-tab="download">Download</div>
+          <div class="tab" data-tab="history">History</div>
+          <div class="tab hidden" id="adminTab" data-tab="admin">Admin</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div id="tab-download">
+          <div class="muted small">Enter an <b>App ID</b> to download <code>appid.zip</code> from the latest GitHub release.</div>
+          <div style="height:10px"></div>
+          <div class="grid2">
+            <div>
+              <div class="small muted">App ID</div>
+              <input id="appId" placeholder="e.g. 730" />
+            </div>
+            <div>
+              <div class="small muted">Or exact asset name (optional)</div>
+              <input id="resource" placeholder="e.g. 730.zip" />
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <button class="btn primary" id="downloadBtn">Start download</button>
+          <div style="height:12px"></div>
+          <div id="downloadResult"></div>
+        </div>
+
+        <div id="tab-history" class="hidden">
+          <div class="muted small">Your last 10 downloads (web + bot).</div>
+          <div style="height:10px"></div>
+          <div id="historyTable"></div>
+        </div>
+
+        <div id="tab-admin" class="hidden">
+          <div class="muted small">Admin view is role-gated (WEBSITE_ADMIN_ROLE_ID).</div>
+          <div style="height:10px"></div>
+          <div class="card" style="padding:12px; border-radius:14px; margin-bottom:10px;">
+            <div class="small muted">Troubleshooting</div>
+            <pre id="adminInfo">Loading…</pre>
+          </div>
+          <div class="small muted">Tips:
+            <ul>
+              <li>Make sure <code>DISCORD_TOKEN</code> is the <b>Bot Token</b>, not the OAuth client secret.</li>
+              <li>Set <code>DISCORD_REDIRECT_URI</code> exactly to <code>https://YOUR.onrender.com/auth/discord/callback</code>.</li>
+              <li>Set <code>GITHUB_OWNER</code> and <code>GITHUB_REPO</code> to the repo hosting the .zip releases.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="profile">
+          <div class="muted">Loading…</div>
+        </div>
+        <div class="hr"></div>
+        <div class="small muted">
+          Free users: <b>5 downloads / 24h</b>. Premium role = unlimited.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  async function api(path, opts) {
+    const r = await fetch(path, { credentials: "include", ...(opts||{}) });
+    const ct = r.headers.get("content-type") || "";
+    const data = ct.includes("application/json") ? await r.json() : await r.text();
+    if (!r.ok) throw { status: r.status, data };
+    return data;
+  }
+
+  function setAuthUI(isAuthed) {
+    const auth = $("authArea");
+    auth.innerHTML = "";
+    if (!isAuthed) {
+      const a = document.createElement("a");
+      a.className = "btn primary";
+      a.href = "/api/auth/discord";
+      a.textContent = "Login with Discord";
+      auth.appendChild(a);
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = "Logout";
+      btn.onclick = async () => { await api("/api/logout", { method:"POST" }); location.reload(); };
+      auth.appendChild(btn);
+    }
+  }
+
+  function renderProfile(me) {
+    const p = $("profile");
+    const premiumBadge = me.premium
+      ? `<span class="badge premium">⭐ Premium</span>`
+      : `<span class="badge free">Free</span>`;
+    const remaining = me.premium ? "∞" : `${me.remaining24h}/${me.freeLimit}`;
+    const used = `${me.used24h}`;
+    const admin = me.isAdmin ? `<span class="badge">Admin</span>` : "";
+    p.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div>
+          <div style="font-weight:800; font-size:18px;">${me.username || me.discordId}</div>
+          <div class="muted small">Discord ID: ${me.discordId}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">${premiumBadge}${admin}</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="grid2">
+        <div class="card" style="padding:12px; border-radius:14px;">
+          <div class="muted small">Used (24h)</div>
+          <div style="font-weight:900; font-size:20px;">${used}</div>
+        </div>
+        <div class="card" style="padding:12px; border-radius:14px;">
+          <div class="muted small">Remaining</div>
+          <div style="font-weight:900; font-size:20px;">${remaining}</div>
+        </div>
+      </div>
+    `;
+    $("adminTab").classList.toggle("hidden", !me.isAdmin);
+    if (me.isAdmin) {
+      $("adminInfo").textContent = JSON.stringify(me, null, 2);
+    }
+  }
+
+  async function loadMe() {
+    try {
+      const me = await api("/api/me");
+      setAuthUI(true);
+      renderProfile(me);
+      return me;
+    } catch (e) {
+      setAuthUI(false);
+      $("profile").innerHTML = `<div class="muted">Not logged in.</div><div style="height:10px"></div><a class="btn primary" href="/api/auth/discord">Login with Discord</a>`;
+      return null;
+    }
+  }
+
+  async function doDownload() {
+    $("downloadResult").innerHTML = `<div class="muted small">Working…</div>`;
+    try {
+      const appId = $("appId").value.trim();
+      const resource = $("resource").value.trim();
+      const data = await api("/api/downloads/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appId, resource })
+      });
+      const a = data.asset;
+      $("downloadResult").innerHTML = `
+        <div class="card" style="padding:12px; border-radius:14px;">
+          <div><b>Ready:</b> ${a.name}</div>
+          <div class="muted small">Release: ${a.releaseTag} • Size: ${Math.round(a.size/1024/1024)} MB</div>
+          <div style="height:8px"></div>
+          <a class="btn primary" href="${a.url}" target="_blank" rel="noreferrer">Download from GitHub</a>
+        </div>
+      `;
+      await loadHistory();
+    } catch (e) {
+      const msg = e?.data?.error === "limit_reached"
+        ? `Limit reached. Free users: 5 downloads / 24h.`
+        : `Error: ${JSON.stringify(e.data || e)}`;
+      $("downloadResult").innerHTML = `<div class="card" style="padding:12px; border-radius:14px; border-color:#49223a; background:#2a1120; color:#ffd1dc;">${msg}</div>`;
+    }
+  }
+
+  async function loadHistory() {
+    const host = $("historyTable");
+    host.innerHTML = `<div class="muted small">Loading…</div>`;
+    try {
+      const data = await api("/api/downloads/recent");
+      const rows = (data.events || []).map(ev => `
+        <tr>
+          <td>${new Date(ev.createdAt).toLocaleString()}</td>
+          <td>${ev.source}</td>
+          <td>${ev.resource}</td>
+        </tr>
+      `).join("");
+      host.innerHTML = `
+        <table>
+          <thead><tr><th>When</th><th>Source</th><th>Resource</th></tr></thead>
+          <tbody>${rows || "<tr><td colspan=3 class='muted'>No downloads yet.</td></tr>"}</tbody>
+        </table>
+      `;
+    } catch (e) {
+      host.innerHTML = `<div class="muted small">Login to see history.</div>`;
+    }
+  }
+
+  function setupTabs() {
+    document.querySelectorAll(".tab").forEach(t => {
+      t.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        const tab = t.getAttribute("data-tab");
+        ["download","history","admin"].forEach(k => {
+          document.getElementById("tab-" + k).classList.toggle("hidden", k !== tab);
+        });
+      });
+    });
+  }
+
+  $("downloadBtn").addEventListener("click", doDownload);
+  setupTabs();
+  (async () => {
+    const me = await loadMe();
+    if (me) await loadHistory();
+  })();
+</script>
+</body>
+</html>
